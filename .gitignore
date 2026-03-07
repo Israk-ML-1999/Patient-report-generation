@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Environment
+.env
+venv/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+/audio
+
+# Test outputs
+htmlcov/
+coverage.xml
+
+# ChromaDB
+chroma_db_data/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Node
+node_modules/
+
+# Backup
+*.bak
+*.swp
+*.swo
+# Audio files
+.*.mp3
+*.wav
