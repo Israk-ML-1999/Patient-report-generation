@@ -11,7 +11,7 @@ router = APIRouter()
     summary="MedAI Chatbot",
     description=(
         "Medical AI chatbot for doctors and patients. "
-        "Supports conversation history (last 3 pairs) and user information for personalized responses. "
+        "Supports conversation history (last 3 pairs) and patient information for personalized responses. "
         "Doctors can also request patient question suggestions."
     ),
 )
@@ -20,7 +20,7 @@ async def medai_chatbot(request: ChatTextRequest):
         answer = await medai_chat(
             user_query=request.user_query,
             conversation_history=request.conversation_history,
-            user_information=request.user_information,
+            patient_information=request.patient_information,
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Chatbot error: {str(e)}")

@@ -11,9 +11,9 @@ class ChatTextRequest(BaseModel):
             "Each dict should have 'user_query' and 'ai_response' keys."
         ),
     )
-    user_information: Optional[str] = Field(
+    patient_information: Optional[str] = Field(
         None,
-        description="User profile / patient information as plain text for personalized responses",
+        description="patient information as plain text for personalized responses",
     )
 
 

@@ -7,30 +7,41 @@ genai.configure(api_key=GEMINI_API_KEY)
 
 # System prompt is STATIC — no placeholders here.
 # Dynamic context (history + user info) is injected into the user-turn prompt at call time.
-SYSTEM_PROMPT = """You are MedAI, an expert medical AI assistant designed to support both doctors and patients.
+SYSTEM_PROMPT = """You are MedAI, a concise and expert medical AI assistant for doctors.
 
-Your capabilities:
-1. Answer medical questions accurately and professionally.
-2. When a DOCTOR is using the system, you can suggest relevant clear questions a doctor might ask their patient based on the patient's condition or information provided.
-3. When a PATIENT is using the system, answer in clear, empathetic, and easy-to-understand language.
-4. Use the provided conversation history and user information to give personalized, context-aware responses.
-5. Always maintain patient safety — if a question suggests an emergency, advise seeking immediate medical care.
-6. Do not fabricate diagnoses, medications, or clinical information. Base answers on established medical knowledge.
-7. Be concise, accurate, and helpful.
+GREETING: When greeted (hi, hello, hey, etc.), respond only with:
+"Hello! I'm MedAI, your medical assistant. How can I help you today?"
+Never mention patient information in a greeting.
 
-For doctor users asking about patient question suggestions:
-- Suggest a numbered list of clinically relevant questions to ask the patient based on their condition/information.
+RESPONSE STYLE:
+- Keep all answers short and effective — under 150 words unless detail is truly necessary.
+- Be accurate, professional, and clinically relevant.
+- Do not fabricate diagnoses or medications. Base answers on established medical knowledge.
+- For emergencies, always advise the doctor to act immediately.
+
+GENERAL QUESTIONS (no patient info needed):
+- Answer any general medical question (e.g., "What is diabetes?", "Fever for 1 week — what to do?") clearly and directly.
+- Include practical tips and common medication names where relevant.
+
+WITH PATIENT INFORMATION:
+- Use the patient's details (condition, symptoms, history, age) to give personalized, context-aware answers.
+- When asked for question suggestions, provide a concise numbered list of clinically relevant questions the doctor should ask THIS specific patient based on their information.
+
+WITHOUT PATIENT INFORMATION (question suggestions only):
+- If the doctor asks for patient question suggestions and no patient info is provided, respond only with:
+  "I don't have any patient information. Please share the patient's details and I'll suggest the right questions to ask them."
+- Do NOT generate question suggestions without patient information.
 """
 
 
 def build_prompt(
     user_query: str,
     conversation_history: Optional[List[Dict[str, str]]],
-    user_information: Optional[str],
+    patient_information: Optional[str],
 ) -> str:
     """
     Build the full user-turn prompt by injecting:
-      - user_information  (static personal/patient context)
+      - patient_information  (static personal/patient context)
       - conversation_history  (last 3 Q&A pairs for memory)
       - current user_query
 
@@ -40,8 +51,8 @@ def build_prompt(
     parts = []
 
     # 1. User / patient profile context
-    if user_information:
-        parts.append(f"[User Information]\n{user_information}\n")
+    if patient_information:
+        parts.append(f"[User Information]\n{patient_information}\n")
 
     # 2. Conversation memory — last 3 pairs only
     if conversation_history:
@@ -66,7 +77,7 @@ def build_prompt(
 async def medai_chat(
     user_query: str,
     conversation_history: Optional[List[Dict[str, str]]],
-    user_information: Optional[str],
+    patient_information: Optional[str],
 ) -> str:
     # Model is initialised with the static system prompt only
     model = genai.GenerativeModel(
@@ -75,6 +86,6 @@ async def medai_chat(
     )
 
     # All dynamic context is baked into the prompt string
-    prompt = build_prompt(user_query, conversation_history, user_information)
+    prompt = build_prompt(user_query, conversation_history, patient_information)
     response = model.generate_content(prompt)
     return response.text.strip()
